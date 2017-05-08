@@ -10,6 +10,11 @@ from rq import Queue
 import threading
 import signal
 import sys
+
+def signal_handler(signal, frame):
+        sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
 import json
 
 from workers import evaluate_wrapper, submit_wrapper
@@ -58,11 +63,6 @@ if __name__ == "__main__":
     r = redis.Redis()
     client = Listener(r, [config.redis_namespace+'::enqueue_job'], config, JOB_QUEUE, POOL)
     client.start()
-
-def signal_handler(signal, frame):
-        sys.exit(0)
-signal.signal(signal.SIGINT, signal_handler)
-
 
 # Subscribe to the namespace+commands channel
 # In case of a new job, enqueue job.
