@@ -36,3 +36,11 @@ def job_complete_template(result, message=""):
     response["data"] = result
     response["message"] = message
     return response
+
+def update_progress(redis_conn, percent_complete, message="")
+        #Register Progress
+        _progress_update = {}
+        _progress_update["percent_complete"] = percent_complete
+        _progress_update["message"] = message
+
+        redis_conn.rpush(response_channel, job_progress_update(_progress_update, _progress_update["message"]))

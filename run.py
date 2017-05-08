@@ -17,7 +17,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 import json
 
-from workers import evaluate_wrapper, submit_wrapper
+from workers import job_execution_wrapper
 
 POOL = redis.ConnectionPool(host=config.redis_host, port=config.redis_port, db=0)
 r = redis.Redis(connection_pool=POOL)
@@ -41,18 +41,11 @@ class Listener(threading.Thread):
             item['data'] = json.loads(item["data"])
             redis_conn = redis.Redis(connection_pool=self.REDIS_POOL)
 
-            if item["data"]["function_name"] == "evaluate":
-                job = JOB_QUEUE.enqueue(evaluate_wrapper, item["data"])
-                # job = JOB.enqueue(evaluate, item["data"], redis_conn)
-                response_channel = self.config.redis_namespace+"::job_response::"+job.id
-                #Register that the job has been enqueue
-                redis_conn.rpush(response_channel, job_enqueud_template())
-            elif item["data"]["function_name"] == "submit":
-                job = JOB_QUEUE.enqueue(submit_wrapper, item["data"])
-                # job = JOB.enqueue(evaluate, item["data"], redis_conn)
-                response_channel = self.config.redis_namespace+"::job_response::"+job.id
-                #Register that the job has been enqueue
-                redis_conn.rpush(response_channel, job_enqueud_template())
+            job = JOB_QUEUE.enqueue(job_execution_wrapper, item["data"])
+            # job = JOB.enqueue(evaluate, item["data"], redis_conn)
+            response_channel = self.config.redis_namespace+"::job_response::"+job.id
+            #Register that the job has been enqueue
+            redis_conn.rpush(response_channel, job_enqueud_template())
 
 
     def run(self):
