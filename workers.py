@@ -35,11 +35,13 @@ def job_execution_wrapper(data):
     if data["function_name"] == "evaluate":
         # Run the job
         result = _evaluate(data, redis_conn, response_channel)
+        # Register Job Complete event
+        redis_conn.rpush(response_channel, job_complete_template(result))        
     elif data["function_name"] == "submit":
         result = _submit(data, redis_conn, response_channel)
+        # Register Job Complete event
+        redis_conn.rpush(response_channel, job_complete_template(result))
     else:
-        pass
-        #TODO: Add error handler
-    # Register Job Complete event
-    redis_conn.rpush(response_channel, job_complete_template(result))
+        _error_object = job_error_template("Function not implemented error")
+        redis_conn.rpush(response_channel, job_complete_template(result))
     return result

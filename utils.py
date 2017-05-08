@@ -18,9 +18,10 @@ def job_running_template():
     response["job_state"] = JobStates.RUNNING
     return response
 
-def job_error_template():
+def job_error_template(message=""):
     response = response_template()
     response["job_state"] = JobStates.ERROR
+    response["message"] = message
     return response
 
 def job_progress_update(progress_object, message=""):
@@ -42,5 +43,4 @@ def update_progress(redis_conn, percent_complete, message="")
         _progress_update = {}
         _progress_update["percent_complete"] = percent_complete
         _progress_update["message"] = message
-
         redis_conn.rpush(response_channel, job_progress_update(_progress_update, _progress_update["message"]))
