@@ -38,7 +38,7 @@ def job_complete_template(result, message=""):
     response["message"] = message
     return response
 
-def update_progress(redis_conn, percent_complete, message="")
+def update_progress(redis_conn, response_channel, percent_complete, message=""):
         #Register Progress
         _progress_update = {}
         _progress_update["percent_complete"] = percent_complete
