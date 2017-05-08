@@ -12,7 +12,7 @@ import signal
 import sys
 import json
 
-from workers import evaluate
+from workers import evaluate_wrapper, submit_wrapper
 
 POOL = redis.ConnectionPool(host=config.redis_host, port=config.redis_port, db=0)
 r = redis.Redis(connection_pool=POOL)
@@ -32,12 +32,18 @@ class Listener(threading.Thread):
     def work(self, item):
         print "WORKER : ", item['channel'], ":", item['data']
         #item["data"] = json.loads(item["data"])
-        if item["data"]!=1:#TODO: Figure out why the first event has data 1 and fix this block
+        if item["data"]!=1: #TODO: Remove this conditional
             item['data'] = json.loads(item["data"])
-            if item["data"]["function_name"] == "evaluate":
-                redis_conn = redis.Redis(connection_pool=self.REDIS_POOL)
+            redis_conn = redis.Redis(connection_pool=self.REDIS_POOL)
 
-                job = JOB_QUEUE.enqueue(evaluate, item["data"])
+            if item["data"]["function_name"] == "evaluate":
+                job = JOB_QUEUE.enqueue(evaluate_wrapper, item["data"])
+                # job = JOB.enqueue(evaluate, item["data"], redis_conn)
+                response_channel = self.config.redis_namespace+"::job_response::"+job.id
+                #Register that the job has been enqueue
+                redis_conn.rpush(response_channel, job_enqueud_template())
+            elif item["data"]["function_name"] == "submit":
+                job = JOB_QUEUE.enqueue(submit_wrapper, item["data"])
                 # job = JOB.enqueue(evaluate, item["data"], redis_conn)
                 response_channel = self.config.redis_namespace+"::job_response::"+job.id
                 #Register that the job has been enqueue
