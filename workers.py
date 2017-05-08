@@ -31,17 +31,21 @@ def job_execution_wrapper(data):
 
     # Register Job Running event
     redis_conn.rpush(response_channel, job_running_template())
-
-    if data["function_name"] == "evaluate":
-        # Run the job
-        result = _evaluate(data, redis_conn, response_channel)
-        # Register Job Complete event
-        redis_conn.rpush(response_channel, job_complete_template(result))        
-    elif data["function_name"] == "submit":
-        result = _submit(data, redis_conn, response_channel)
-        # Register Job Complete event
-        redis_conn.rpush(response_channel, job_complete_template(result))
-    else:
-        _error_object = job_error_template("Function not implemented error")
+    result = {}
+    try:
+        if data["function_name"] == "evaluate":
+            # Run the job
+            result = _evaluate(data, redis_conn, response_channel)
+            # Register Job Complete event
+            redis_conn.rpush(response_channel, job_complete_template(result))
+        elif data["function_name"] == "submit":
+            result = _submit(data, redis_conn, response_channel)
+            # Register Job Complete event
+            redis_conn.rpush(response_channel, job_complete_template(result))
+        else:
+            _error_object = job_error_template("Function not implemented error")
+            redis_conn.rpush(response_channel, job_complete_template(result))
+    except Exception as e:
+        _error_object = job_error_template(str(e))
         redis_conn.rpush(response_channel, job_complete_template(result))
     return result
