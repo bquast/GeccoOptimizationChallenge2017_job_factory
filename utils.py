@@ -1,4 +1,5 @@
 from job_states import JobStates
+import json
 
 def response_template():
     _message = {}
@@ -43,4 +44,4 @@ def update_progress(redis_conn, response_channel, percent_complete, message=""):
         _progress_update = {}
         _progress_update["percent_complete"] = percent_complete
         _progress_update["message"] = message
-        redis_conn.rpush(response_channel, job_progress_update(_progress_update, _progress_update["message"]))
+        redis_conn.rpush(response_channel, json.dumps(job_progress_update(_progress_update, _progress_update["message"])))

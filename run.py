@@ -10,6 +10,7 @@ from rq import Queue
 import threading
 import signal
 import sys
+import json
 
 def signal_handler(signal, frame):
         sys.exit(0)
@@ -56,7 +57,7 @@ class Listener(threading.Thread):
             # Register that the job has been enqueue
             # TODO: Try to make sure that this is the first message in the response_channel
             #       Possibly by using Job.create ?
-            redis_conn.rpush(response_channel, job_enqueud_template())
+            redis_conn.rpush(response_channel, json.dumps(job_enqueud_template()))
 
 
     def run(self):

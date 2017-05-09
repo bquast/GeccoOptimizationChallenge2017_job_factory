@@ -5,6 +5,7 @@ from utils import *
 import redis
 from rq import get_current_job
 import time
+import json
 
 POOL = redis.ConnectionPool(host=config.redis_host, port=config.redis_port, db=0)
 
@@ -42,29 +43,36 @@ def _submit(data, redis_conn, response_channel):
     }
     return _result_object
 
+def _update_job_event(redis_conn, response_channel, data):
+    """
+        Helper function to serialize JSON
+        and make sure redis doesnt messup JSON validation
+    """
+    redis_conn.rpush(response_channel, json.dumps(data))
+
 def job_execution_wrapper(data):
     redis_conn = redis.Redis(connection_pool=POOL)
     job = get_current_job()
     response_channel = config.redis_namespace+"::job_response::"+job.id
 
     # Register Job Running event
-    redis_conn.rpush(response_channel, job_running_template())
+    _update_job_event(redis_conn, response_channel, job_running_template())
     result = {}
     try:
         if data["function_name"] == "evaluate":
             # Run the job
             result = _evaluate(data, redis_conn, response_channel)
             # Register Job Complete event
-            redis_conn.rpush(response_channel, job_complete_template(result))
+            _update_job_event(redis_conn, response_channel, job_complete_template(result))
         elif data["function_name"] == "submit":
             result = _submit(data, redis_conn, response_channel)
             # Register Job Complete event
-            redis_conn.rpush(response_channel, job_complete_template(result))
+            _update_job_event(redis_conn, response_channel, job_complete_template(result))
         else:
             _error_object = job_error_template("Function not implemented error")
-            redis_conn.rpush(response_channel, job_complete_template(result))
+            _update_job_event(redis_conn, response_channel, job_complete_template(result))
     except Exception as e:
         print "Error : ", str(e)
         _error_object = job_error_template(str(e))
-        redis_conn.rpush(response_channel, _error_object)
+        _update_job_event(redis_conn, response_channel, _error_object)
     return result
