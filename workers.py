@@ -14,10 +14,10 @@ def _evaluate(data, context):
         Takes a single list of params and computes the score based on BluePyOpt
     """
     result = 0
-    for k in range(10):
+    for k in range(100):
         time.sleep(0.1)
-        percent_complete = k*1.0/10 * 100
-        update_progress(context, percent_complete, "") #The third param is an optional message
+        percent_complete = k*1.0/100 * 100
+        update_progress(context, percent_complete, "")
         result += k
     _result_object = {
         "score" : result,
@@ -33,7 +33,7 @@ def _submit(data, context):
     for k in range(10):
         time.sleep(1)
         percent_complete = k*1.0/100
-        update_progress(context, percent_complete, "")  #The third param is an optional message
+        update_progress(context, percent_complete, "")
         result += k
 
     _result_object = {
