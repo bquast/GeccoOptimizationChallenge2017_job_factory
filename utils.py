@@ -6,7 +6,7 @@ def response_template(job_id):
     _message["job_id"] = job_id
     _message["job_state"] = None
     _message["data"] = {}
-    _message["message"] = "Placeholder Message"
+    _message["message"] = ""
 
     return _message
 

@@ -16,7 +16,7 @@ def _evaluate(data, context):
     result = 0
     for k in range(10):
         percent_complete = k*1.0/100
-        update_progress(context, percent_complete, "Optional Message")
+        update_progress(context, percent_complete, "") #The third param is an optional message
         result += k
     _result_object = {
         "score" : result,
@@ -32,7 +32,7 @@ def _submit(data, context):
     for k in range(10):
         time.sleep(1)
         percent_complete = k*1.0/100
-        update_progress(context, percent_complete, "Optional Message")
+        update_progress(context, percent_complete, "")  #The third param is an optional message
         result += k
 
     _result_object = {
