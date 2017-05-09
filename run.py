@@ -57,7 +57,7 @@ class Listener(threading.Thread):
             # Register that the job has been enqueue
             # TODO: Try to make sure that this is the first message in the response_channel
             #       Possibly by using Job.create ?
-            redis_conn.rpush(response_channel, json.dumps(job_enqueud_template()))
+            redis_conn.rpush(response_channel, json.dumps(job_enqueud_template(job.id)))
 
 
     def run(self):
