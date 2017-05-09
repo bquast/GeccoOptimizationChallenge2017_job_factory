@@ -14,6 +14,7 @@ def _evaluate(data, redis_conn, response_channel):
     """
     result = 0
     for k in range(10):
+        time.sleep(1)
         percent_complete = k*1.0/100
         update_progress(redis_conn, response_channel, percent_complete, "Optional Message")
         result += k
@@ -29,6 +30,7 @@ def _submit(data, redis_conn, response_channel):
     """
     result = 0
     for k in range(10):
+        time.sleep(1)
         percent_complete = k*1.0/100
         update_progress(redis_conn, response_channel, percent_complete, "Optional Message")
         result += k
@@ -64,5 +66,5 @@ def job_execution_wrapper(data):
     except Exception as e:
         print "Error : ", str(e)
         _error_object = job_error_template(str(e))
-        redis_conn.rpush(response_channel, job_complete_template(result))
+        redis_conn.rpush(response_channel, _error_object)
     return result

@@ -42,9 +42,20 @@ class Listener(threading.Thread):
             redis_conn = redis.Redis(connection_pool=self.REDIS_POOL)
 
             job = JOB_QUEUE.enqueue(job_execution_wrapper, item["data"])
-            # job = JOB.enqueue(evaluate, item["data"], redis_conn)
             response_channel = self.config.redis_namespace+"::job_response::"+job.id
-            #Register that the job has been enqueue
+            # Note the job will automatically know the job.id by using
+            # the get_current_job() function
+
+            # Now we need to pass the response_channel to the client requesting the enque
+            # TODO: Validate respond_to_me_at
+            redis_conn.rpush(item["data"]["respond_to_me_at"], response_channel)
+            # Note we are passing a new response_channel for the  job response to guarantee
+            # that individual job responses are not hijacked
+
+
+            # Register that the job has been enqueue
+            # TODO: Try to make sure that this is the first message in the response_channel
+            #       Possibly by using Job.create ?
             redis_conn.rpush(response_channel, job_enqueud_template())
 
 
