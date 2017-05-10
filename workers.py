@@ -16,7 +16,7 @@ def _evaluate(data, context):
     """
         Takes a single list of params and computes the score based on BluePyOpt
     """
-    print "Received : ", data, " Sequence Number : ", context["data_sequence_no"]
+    # print "Received : ", data, " Sequence Number : ", context["data_sequence_no"]
     score = 0
     secondary_score = 0
 
@@ -24,9 +24,9 @@ def _evaluate(data, context):
         time.sleep(0.01)
         percent_complete = k*1.0/100 * 100
         update_progress(context, percent_complete, "")
-        print "Context Response Channel ::: ", context['response_channel']
+        # print "Context Response Channel ::: ", context['response_channel']
         if k%20==0:
-            print "Update : ", percent_complete
+            # print "Update : ", percent_complete
         score += random.randint(1,100)*1.0/0.7 / 100
         secondary_score += random.randint(1,100)*1.0/0.7 / 100
 
@@ -87,7 +87,7 @@ def job_execution_wrapper(data):
             _update_job_event(_context, job_error_template(job.id, result))
             result = _error_object
     except Exception as e:
-        print "Error : ", str(e)
+        # print "Error : ", str(e)
         _error_object = job_error_template(_context['data_sequence_no'], job.id, str(e))
         _update_job_event(_context, _error_object)
     return result
