@@ -21,12 +21,12 @@ def _evaluate(data, context):
     secondary_score = 0
 
     for k in range(100):
-        time.sleep(0.01)
+        time.sleep(random.randint(0,100)/1000.0)
         percent_complete = k*1.0/100 * 100
         update_progress(context, percent_complete, "")
         # print "Context Response Channel ::: ", context['response_channel']
-        if k%20==0:
-            # print "Update : ", percent_complete
+        # if k%20==0:
+        #     # print "Update : ", percent_complete
         score += random.randint(1,100)*1.0/0.7 / 100
         secondary_score += random.randint(1,100)*1.0/0.7 / 100
 
