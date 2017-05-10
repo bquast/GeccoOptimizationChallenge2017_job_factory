@@ -46,4 +46,5 @@ def update_progress(context, percent_complete, message=""):
         _progress_update = {}
         _progress_update["percent_complete"] = percent_complete
         _progress_update["message"] = message
+        _progress_update["data_sequence_no"] = context["data_sequence_no"]
         context['redis_conn'].rpush(context['response_channel'], json.dumps(job_progress_update(context['job_id'], _progress_update, _progress_update["message"])))
