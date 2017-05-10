@@ -50,7 +50,7 @@ class Listener(threading.Thread):
             # TODO: Validate respond_to_me_at
             # TODO: Try to make sure that this is the first message in the response_channel
             #       Possibly by using Job.create ?
-            redis_conn.rpush(item["data"]["respond_to_me_at"], json.dumps(job_enqueud_template(job.id)))
+            redis_conn.rpush(item["data"]["respond_to_me_at"], json.dumps(job_enqueud_template(item["data"]["data_sequence_no"], job.id)))
 
 
     def run(self):

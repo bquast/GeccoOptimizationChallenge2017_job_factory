@@ -7,6 +7,8 @@ from rq import get_current_job
 import time
 import json
 
+import sys
+
 POOL = redis.ConnectionPool(host=config.redis_host, port=config.redis_port, db=0)
 
 def _evaluate(data, context):
@@ -16,6 +18,7 @@ def _evaluate(data, context):
     print "Received : ", data, " Sequence Number : ", context["data_sequence_no"]
     result = 0
     for k in range(100):
+        time.sleep(0.1)
         percent_complete = k*1.0/100 * 100
         update_progress(context, percent_complete, "")
         print "Context Response Channel ::: ", context['response_channel']
@@ -69,24 +72,24 @@ def job_execution_wrapper(data):
     _context['data_sequence_no'] = data['data_sequence_no']
 
     # Register Job Running event
-    _update_job_event(_context, job_running_template(job.id))
+    _update_job_event(_context, job_running_template(_context['data_sequence_no'], job.id))
     result = {}
     try:
         if data["function_name"] == "evaluate":
             # Run the job
             result = _evaluate(data["data"], _context)
             # Register Job Complete event
-            _update_job_event(_context, job_complete_template(job.id, result))
+            _update_job_event(_context, job_complete_template(_context, result))
         elif data["function_name"] == "submit":
             result = _submit(data["data"], _context)
             # Register Job Complete event
-            _update_job_event(_context, job_complete_template(job.id, result))
+            _update_job_event(_context, job_complete_template(_context, result))
         else:
             _error_object = job_error_template(job.id, "Function not implemented error")
             _update_job_event(_context, job_error_template(job.id, result))
             result = _error_object
     except Exception as e:
         print "Error : ", str(e)
-        _error_object = job_error_template(job.id, str(e))
+        _error_object = job_error_template(_context['data_sequence_no'], job.id, str(e))
         _update_job_event(_context, _error_object)
     return result
