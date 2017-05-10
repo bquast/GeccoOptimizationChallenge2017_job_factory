@@ -8,6 +8,7 @@ import time
 import json
 
 import sys
+import random
 
 POOL = redis.ConnectionPool(host=config.redis_host, port=config.redis_port, db=0)
 
@@ -16,38 +17,34 @@ def _evaluate(data, context):
         Takes a single list of params and computes the score based on BluePyOpt
     """
     print "Received : ", data, " Sequence Number : ", context["data_sequence_no"]
-    result = 0
+    score = 0
+    secondary_score = 0
+
     for k in range(100):
-        time.sleep(0.1)
+        # time.sleep(0.05)
         percent_complete = k*1.0/100 * 100
         update_progress(context, percent_complete, "")
         print "Context Response Channel ::: ", context['response_channel']
         if k%20==0:
             print "Update : ", percent_complete
-        result += k
+        score += random.randint(1,100)*1.0/0.7 / 100
+        secondary_score += random.randint(1,100)*1.0/0.7 / 100
+
     _result_object = {
-        "score" : result,
+        "score" : score,
+        "secondary_score" : secondary_score,
     }
     return _result_object
 
 def _submit(data, context):
     """
         Takes a single list of params and computes the score based on BluePyOpt
-        Also generates the relevant Images, and uploads to a S3 bucket, and sends back the link
     """
-    print "Received : ", data, " Sequence Number : ", context["data_sequence_no"]
-    result = 0
-    for k in range(10):
-        time.sleep(1)
-        percent_complete = k*1.0/100
-        update_progress(context, percent_complete, "")
-        result += k
-
-    _result_object = {
-        "score" : result,
-        "thumbnail" : "link-to-thumbnail-for-the-submission-on-the-leaderboard",
-        "image" : "link-to-image-for-the-submission-on-the-leaderboard"
-    }
+    _result_object = _evaluate(data, context)
+    _result_object["comment"] = ""
+    _result_object["media_large"] = "https://upload.wikimedia.org/wikipedia/commons/4/44/Drift_Diffusion_Model_Accumulation_to_Threshold_Example_Graphs.png"
+    _result_object["media_thumbnail"] = "https://upload.wikimedia.org/wikipedia/commons/4/44/Drift_Diffusion_Model_Accumulation_to_Threshold_Example_Graphs.png"
+    _result_object["media_content_type"] = "image/jpeg"
     return _result_object
 
 def _update_job_event(_context, data):
@@ -81,6 +78,7 @@ def job_execution_wrapper(data):
             # Register Job Complete event
             _update_job_event(_context, job_complete_template(_context, result))
         elif data["function_name"] == "submit":
+            # Run the job
             result = _submit(data["data"], _context)
             # Register Job Complete event
             _update_job_event(_context, job_complete_template(_context, result))
