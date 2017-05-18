@@ -13,9 +13,6 @@ python run.py
 rqworker
 # Then in a separate tab
 rq-dashboard
-# Now you should be able to track job status at localhost:9181
-# Then to test if everything works, in a separate tab run
-python example_usage.py
 ```
 
 # Author
