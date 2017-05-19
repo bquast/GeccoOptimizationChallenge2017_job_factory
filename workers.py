@@ -56,7 +56,6 @@ def _update_job_event(_context, data):
     response_channel = _context['response_channel']
     data['data_sequence_no'] = _context['data_sequence_no']
 
-    print "Job Event : ", data
     redis_conn.rpush(response_channel, json.dumps(data))
 
 def job_execution_wrapper(data):
